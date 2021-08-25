@@ -4,6 +4,7 @@ import { Feather } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FlatList } from "react-native";
 import { TransactionCardProps } from "../../components/TransactionCard";
+import { BorderlessButton } from "react-native-gesture-handler";
 
 export const Container = styled.View`
   flex: 1;
@@ -60,6 +61,8 @@ export const Icon = styled(Feather)`
   color: ${(props) => props.theme.colors.secondary};
   font-size: ${RFValue(24)}px;
 `;
+
+export const LogoutButton = styled(BorderlessButton)``;
 
 export const HighlightCards = styled.ScrollView.attrs({
   horizontal: true,
