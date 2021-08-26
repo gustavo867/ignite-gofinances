@@ -19,7 +19,7 @@ const InputForm: React.FC<Props> = ({ control, name, error, ...rest }) => {
         name={name}
         render={({ field: { onChange, onBlur, value } }) => (
           <Input
-            onChange={onChange}
+            onChangeText={onChange}
             onBlur={onBlur}
             value={value}
             {...(rest as any)}
