@@ -19,13 +19,18 @@ export type TransactionCardProps = {
 
 type Props = {
   data: TransactionCardProps;
+  removeTransaction(id: string): void;
 };
 
 function TransactionCard(props: Props) {
+  const { removeTransaction } = props;
   const category = categories.find((c) => c.key === props.data.categoryKey);
 
   return (
     <S.Container>
+      <S.TrashButton onPress={() => removeTransaction(props.data.id)}>
+        <S.TrashIcon name="trash" />
+      </S.TrashButton>
       <S.Title>{props.data.title}</S.Title>
 
       <S.Amount type={props.data.type}>

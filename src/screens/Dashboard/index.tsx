@@ -12,6 +12,8 @@ import {
 import { HighlightCard } from "../../components/HighlightCard";
 import { ActivityIndicator } from "react-native";
 import { useTheme } from "styled-components";
+import { useAuth } from "../../hooks/auth";
+import { Alert } from "react-native";
 
 type Transaction = {
   amount: number;
@@ -35,6 +37,7 @@ type HighlightData = {
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
+  const { logOutUser, user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [transactions, setTransactions] = useState<TransactionCardProps[]>([]);
   const [higlightData, setHighlightData] = useState<HighlightData>(
@@ -45,80 +48,93 @@ const Dashboard: React.FC = () => {
     collection: Transaction[],
     type: "up" | "down"
   ) {
-    const lastTransaction = new Date(
-      Math.max.apply(
-        Math,
-        collection
-          .filter((tr) => tr.transactionType === type)
-          .map((tr) => new Date(tr.date).getTime())
-      )
+    const existsTransactions = collection.find(
+      (cl) => cl.transactionType === type
     );
 
-    return `${lastTransaction.getDate()} de ${lastTransaction.toLocaleString(
-      "pt-BR",
-      { month: "long" }
-    )}`;
+    if (existsTransactions) {
+      const lastTransaction = new Date(
+        Math.max.apply(
+          Math,
+          collection
+            .filter((tr) => tr.transactionType === type)
+            .map((tr) => new Date(tr.date).getTime())
+        )
+      );
+
+      return `${lastTransaction.getDate()} de ${lastTransaction.toLocaleString(
+        "pt-BR",
+        { month: "long" }
+      )}`;
+    }
+
+    return null;
   }
 
-  async function loadTransactions() {
-    const response = await AsyncStorage.getItem(TRANSACTIONS_KEY);
-    const transactions: Transaction[] = response ? JSON.parse(response) : [];
+  async function mountTransactionData(transactionsData: Transaction[]) {
+    let entriesTotal = 0;
+    let expensiveTotal = 0;
 
-    if (transactions.length >= 1) {
-      let entriesTotal = 0;
-      let expensiveTotal = 0;
+    const transactionsFormatted = transactionsData.map((item) => {
+      if (item.transactionType === "up") {
+        entriesTotal += Number(item.amount);
+      }
 
-      const transactionsFormatted = transactions.map((item) => {
-        if (item.transactionType === "up") {
-          entriesTotal += Number(item.amount);
-        }
+      if (item.transactionType === "down") {
+        expensiveTotal += Number(item.amount);
+      }
 
-        if (item.transactionType === "down") {
-          expensiveTotal += Number(item.amount);
-        }
+      return {
+        title: item.name,
+        date: Intl.DateTimeFormat("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "2-digit",
+        }).format(new Date(item.date)),
+        id: item.id,
+        type: item.transactionType === "up" ? "positive" : "negative",
+        amount: Number(item.amount).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }),
+        categoryKey: item.category,
+      };
+    });
 
-        return {
-          title: item.name,
-          date: Intl.DateTimeFormat("pt-BR", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "2-digit",
-          }).format(new Date(item.date)),
-          id: item.id,
-          type: item.transactionType === "up" ? "positive" : "negative",
-          amount: Number(item.amount).toLocaleString("pt-BR", {
-            style: "currency",
-            currency: "BRL",
-          }),
-          categoryKey: item.category,
-        };
-      });
+    const total = entriesTotal - expensiveTotal;
 
-      const total = entriesTotal - expensiveTotal;
+    const lastTransactionEntries = getLastTransactionDate(
+      transactionsData,
+      "up"
+    );
+    const lastTransactionExpensive = getLastTransactionDate(
+      transactionsData,
+      "down"
+    );
+    const totalInterval = lastTransactionExpensive
+      ? `01 a ${lastTransactionExpensive}`
+      : "Não há transações";
 
-      setTransactions(transactionsFormatted.reverse());
-
-      const lastTransactionEntries = getLastTransactionDate(transactions, "up");
-      const lastTransactionExpensive = getLastTransactionDate(
-        transactions,
-        "down"
-      );
-      const totalInterval = `01 a ${lastTransactionExpensive}`;
-
-      setHighlightData({
+    return {
+      transactions: transactionsFormatted.reverse(),
+      higlightData: {
         entries: {
           amount: Number(entriesTotal).toLocaleString("pt-BR", {
             style: "currency",
             currency: "BRL",
           }),
-          lastTransaction: `Última entrada dia ${lastTransactionEntries}`,
+          lastTransaction: lastTransactionEntries
+            ? `Última entrada dia ${lastTransactionEntries}`
+            : "Não há transações",
         },
         expensives: {
           amount: Number(expensiveTotal).toLocaleString("pt-BR", {
             style: "currency",
             currency: "BRL",
           }),
-          lastTransaction: `Última saída dia ${lastTransactionExpensive}`,
+          lastTransaction: lastTransactionExpensive
+            ? `Última saída dia ${lastTransactionExpensive}`
+            : "Não há transanções",
         },
         total: {
           amount: Number(total).toLocaleString("pt-BR", {
@@ -127,9 +143,74 @@ const Dashboard: React.FC = () => {
           }),
           lastTransaction: totalInterval,
         },
-      });
+      },
+    };
+  }
+
+  async function loadTransactions() {
+    const response = await AsyncStorage.getItem(
+      `${TRANSACTIONS_KEY}_user:${user.id}`
+    );
+    const transactions: Transaction[] = response ? JSON.parse(response) : [];
+
+    if (transactions.length >= 1) {
+      const { higlightData, transactions: transactionsData } =
+        await mountTransactionData(transactions);
+
+      setHighlightData(higlightData);
+      setTransactions(transactionsData);
 
       setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }
+
+  function removeTransaction(id: string) {
+    try {
+      Alert.alert("Deseja excluir a transação?", "", [
+        {
+          text: "Sim",
+          onPress: async () => {
+            setLoading(true);
+
+            const response = await AsyncStorage.getItem(
+              `${TRANSACTIONS_KEY}_user:${user.id}`
+            );
+
+            const transactions: Transaction[] = response
+              ? JSON.parse(response)
+              : [];
+
+            if (!transactions) {
+              return Alert.alert("Erro ao excluir transação");
+            }
+
+            const newsTransactions = transactions.filter((tr) => tr.id !== id);
+
+            await AsyncStorage.setItem(
+              `${TRANSACTIONS_KEY}_user:${user.id}`,
+              JSON.stringify(newsTransactions)
+            );
+
+            const mountedData = await mountTransactionData(newsTransactions);
+
+            setHighlightData(mountedData.higlightData);
+            setTransactions(mountedData.transactions);
+
+            setLoading(false);
+          },
+          style: "default",
+        },
+        {
+          text: "Não",
+          style: "cancel",
+        },
+      ]);
+    } catch (error) {
+      console.log(error);
+
+      throw new Error(error);
     }
   }
 
@@ -152,15 +233,17 @@ const Dashboard: React.FC = () => {
               <S.UserInfo>
                 <S.Photo
                   source={{
-                    uri: "https://avatars.githubusercontent.com/u/63013756?v=4",
+                    uri:
+                      user.photo ??
+                      `https://ui-avatars.com/api/?name=${user.name}&length=2`,
                   }}
                 />
                 <S.User>
                   <S.UserGreeting>Olá,</S.UserGreeting>
-                  <S.UserName>Gustavo</S.UserName>
+                  <S.UserName>{user.name}</S.UserName>
                 </S.User>
               </S.UserInfo>
-              <S.LogoutButton onPress={() => {}}>
+              <S.LogoutButton onPress={logOutUser}>
                 <S.Icon name="power" />
               </S.LogoutButton>
             </S.UserWrapper>
@@ -168,20 +251,20 @@ const Dashboard: React.FC = () => {
           <S.HighlightCards>
             <HighlightCard
               title="Entrada"
-              lastTransaction={higlightData?.entries.lastTransaction}
-              amount={higlightData?.entries?.amount ?? ""}
+              lastTransaction={higlightData?.entries?.lastTransaction}
+              amount={higlightData?.entries?.amount ?? "R$ 0,00"}
               type="up"
             />
             <HighlightCard
               title="Saídas"
-              lastTransaction={higlightData?.expensives.lastTransaction}
-              amount={higlightData?.expensives?.amount ?? ""}
+              lastTransaction={higlightData?.expensives?.lastTransaction}
+              amount={higlightData?.expensives?.amount ?? "R$ 0,00"}
               type="down"
             />
             <HighlightCard
               title="Total"
-              lastTransaction={higlightData?.total.lastTransaction}
-              amount={higlightData?.total?.amount ?? ""}
+              lastTransaction={higlightData?.total?.lastTransaction}
+              amount={higlightData?.total?.amount ?? "R$ 0,00"}
               type="total"
             />
           </S.HighlightCards>
@@ -190,7 +273,12 @@ const Dashboard: React.FC = () => {
             <S.TransactionList
               data={transactions}
               keyExtractor={(item) => item.id}
-              renderItem={({ item, index }) => <TransactionCard data={item} />}
+              renderItem={({ item, index }) => (
+                <TransactionCard
+                  removeTransaction={removeTransaction}
+                  data={item}
+                />
+              )}
             />
           </S.Transactions>
         </>

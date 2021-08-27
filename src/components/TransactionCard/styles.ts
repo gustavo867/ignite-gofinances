@@ -19,6 +19,28 @@ export const Title = styled.Text`
   font-family: ${(props) => props.theme.fonts.regular};
 `;
 
+export const TrashButton = styled.TouchableOpacity.attrs({
+  hitSlop: {
+    left: RFValue(50),
+    right: RFValue(50),
+    top: RFValue(50),
+    bottom: RFValue(50),
+  },
+})`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: ${RFValue(30)}px;
+  height: ${RFValue(30)}px;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const TrashIcon = styled(Feather)`
+  font-size: ${RFValue(20)}px;
+  color: ${(props) => props.theme.colors.text};
+`;
+
 export const Amount = styled.Text<TypeProps>`
   font-size: ${RFValue(20)}px;
   font-family: ${(props) => props.theme.fonts.regular};

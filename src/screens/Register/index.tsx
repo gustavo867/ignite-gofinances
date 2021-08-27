@@ -16,6 +16,7 @@ import { CategorySelect } from "../CategorySelect";
 import { CategorySelectButton } from "../../components/Forms/CategorySelectButton";
 import { TRANSACTIONS_KEY } from "../../keys";
 import { useNavigation } from "@react-navigation/native";
+import { useAuth } from "../../hooks/auth";
 
 interface FormData {
   name: string;
@@ -26,11 +27,13 @@ const schema = Yup.object().shape({
   name: Yup.string().required("Nome é obrigatório"),
   amount: Yup.number()
     .typeError("Informe um valor númerico")
-    .positive("O valor não pode ser negativo"),
+    .positive("O valor não pode ser negativo")
+    .required("O valor é obrigatório"),
 });
 
 function Register() {
   const { navigate } = useNavigation();
+  const { user } = useAuth();
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [transactionType, setTransactionType] = useState("");
 
@@ -76,7 +79,7 @@ function Register() {
 
     try {
       const transactionsHistoryData = await AsyncStorage.getItem(
-        TRANSACTIONS_KEY
+        `${TRANSACTIONS_KEY}_user:${user.id}`
       );
       const transactionsHistory = transactionsHistoryData
         ? JSON.parse(transactionsHistoryData)
@@ -85,7 +88,7 @@ function Register() {
       const dataFormatted = [...transactionsHistory, data];
 
       await AsyncStorage.setItem(
-        TRANSACTIONS_KEY,
+        `${TRANSACTIONS_KEY}_user:${user.id}`,
         JSON.stringify(dataFormatted)
       );
 

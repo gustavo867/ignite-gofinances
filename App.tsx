@@ -12,7 +12,8 @@ import AppLoading from "expo-app-loading";
 import theme from "./src/global/styles/theme";
 
 import { NavigationContainer } from "@react-navigation/native";
-import { Routes } from "./src/routes/app.routes";
+import { AppRoutes } from "./src/routes/app.routes";
+import { AuthProvider } from "./src/hooks/auth";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -29,7 +30,9 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <StatusBar style="light" translucent />
       <NavigationContainer>
-        <Routes />
+        <AuthProvider>
+          <AppRoutes />
+        </AuthProvider>
       </NavigationContainer>
     </ThemeProvider>
   );

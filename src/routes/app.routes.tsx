@@ -7,13 +7,16 @@ import { Register } from "../screens/Register";
 import { useTheme } from "styled-components";
 import { Platform } from "react-native";
 import { Resume } from "../screens/Resume";
+import { useAuth } from "../hooks/auth";
+import { AuthRoutes } from "./auth.routes";
 
 const { Navigator, Screen } = createBottomTabNavigator();
 
-export function Routes() {
+export function AppRoutes() {
+  const { user } = useAuth();
   const theme = useTheme();
 
-  return (
+  return user.id ? (
     <Navigator
       screenOptions={{
         tabBarActiveTintColor: theme.colors.secondary,
@@ -59,5 +62,7 @@ export function Routes() {
         }}
       />
     </Navigator>
+  ) : (
+    <AuthRoutes />
   );
 }
