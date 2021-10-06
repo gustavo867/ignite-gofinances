@@ -1,6 +1,7 @@
 import React from "react";
 import * as AuthSession from "expo-auth-session";
 import * as AppleAuthentication from "expo-apple-authentication";
+import * as Google from "expo-google-app-auth";
 import { useContext } from "react";
 import { createContext } from "react";
 import { CLIENT_ID_GOOGLE, REDIRECT_URI_GOOGLE, USER_KEY } from "../keys";
@@ -52,28 +53,18 @@ const AuthProvider: React.FC = ({ children }) => {
     setIsLoading(true);
 
     try {
-      const CLIENT_ID = CLIENT_ID_GOOGLE;
-      const REDIRECT_URI = REDIRECT_URI_GOOGLE;
-      const RESPONSE_TYPE = "token";
-      const SCOPE = encodeURI("profile email");
+      const result = await Google.logInAsync({
+        iosClientId: CLIENT_ID_GOOGLE,
+        androidClientId: CLIENT_ID_GOOGLE,
+        scopes: ["profile", "email"],
+      });
 
-      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}`;
-
-      const { type, params } = (await AuthSession.startAsync({
-        authUrl,
-      })) as AuthorizationResponse;
-
-      if (type === "success") {
-        const response = await fetch(
-          `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${params.access_token}`
-        );
-        const userInfo = (await response.json()) as UserResponse;
-
+      if (result.type === "success") {
         const userLogged = {
-          name: userInfo.name,
-          email: userInfo.email,
-          id: String(userInfo.id),
-          photo: userInfo.picture,
+          id: String(result.user.id),
+          name: result.user.name,
+          email: result.user.email,
+          photo: result.user.photoUrl,
         };
 
         setUser(userLogged);

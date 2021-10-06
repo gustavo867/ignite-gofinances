@@ -4,8 +4,26 @@
     "slug": "gofinances",
     "scheme": "gofinances",
     "version": "1.0.0",
-    "assetBundlePatterns": ["**/*"]
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#5636D3"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.gustavo867.gofinances",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#5636D3"
+      }
+    },
+    "description": ""
   },
-  "packagerOpts": { "config": "metro.config.js" },
+  "packagerOpts": {
+    "config": "metro.config.js"
+  },
   "name": "gofinances"
 }

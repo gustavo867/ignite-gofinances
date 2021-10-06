@@ -52,5 +52,9 @@ export const Icon = styled(Feather)<IconProps>`
 
 export const Title = styled.Text`
   font-size: ${RFValue(14)}px;
+  color: ${(props) =>
+    props.theme.name === "light"
+      ? props.theme.colors.text_dark
+      : props.theme.colors.text};
   font-family: ${(props) => props.theme.fonts.regular};
 `;

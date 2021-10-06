@@ -16,6 +16,10 @@ export const Container = styled.View`
 
 export const Title = styled.Text`
   font-size: ${RFValue(14)}px;
+  color: ${(props) =>
+    props.theme.name === "light"
+      ? props.theme.colors.text_dark
+      : props.theme.colors.text_dark};
   font-family: ${(props) => props.theme.fonts.regular};
 `;
 

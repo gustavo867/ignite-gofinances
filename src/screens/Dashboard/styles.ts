@@ -48,13 +48,19 @@ export const User = styled.View`
 `;
 
 export const UserGreeting = styled.Text`
-  color: ${(props) => props.theme.colors.shape};
+  color: ${(props) =>
+    props.theme.name === "light"
+      ? props.theme.colors.shape
+      : props.theme.colors.text};
   font-size: ${RFValue(18)}px;
   font-family: ${(props) => props.theme.fonts.regular};
 `;
 
 export const UserName = styled.Text`
-  color: ${(props) => props.theme.colors.shape};
+  color: ${(props) =>
+    props.theme.name === "light"
+      ? props.theme.colors.shape
+      : props.theme.colors.text};
   font-size: ${RFValue(18)}px;
   font-family: ${(props) => props.theme.fonts.bold};
 `;
@@ -89,6 +95,10 @@ export const Transactions = styled.View`
 export const Title = styled.Text`
   font-size: ${RFValue(18)}px;
   margin-bottom: 16px;
+  color: ${(props) =>
+    props.theme.name === "light"
+      ? props.theme.colors.text_dark
+      : props.theme.colors.text};
   font-family: ${(props) => props.theme.fonts.regular};
 `;
 

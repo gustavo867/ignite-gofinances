@@ -29,7 +29,9 @@ export const Title = styled.Text<TypeProps>`
   font-size: ${RFValue(14)}px;
   color: ${(props) =>
     props.type === "total"
-      ? props.theme.colors.shape
+      ? props.theme.name === "dark"
+        ? props.theme.colors.text_dark
+        : props.theme.colors.shape
       : props.theme.colors.text_dark};
 `;
 
@@ -50,7 +52,10 @@ export const Icon = styled(Feather)<TypeProps>`
   ${(props) =>
     props.type === "total" &&
     css`
-      color: ${(props) => props.theme.colors.shape};
+      color: ${(props) =>
+        props.theme.name === "dark"
+          ? props.theme.colors.text_dark
+          : props.theme.colors.shape};
     `};
 `;
 
@@ -62,7 +67,9 @@ export const Amount = styled.Text<TypeProps>`
 
   color: ${(props) =>
     props.type === "total"
-      ? props.theme.colors.shape
+      ? props.theme.name === "dark"
+        ? props.theme.colors.text_dark
+        : props.theme.colors.shape
       : props.theme.colors.text_dark};
   margin-top: ${RFValue(38)}px;
 `;
@@ -73,6 +80,8 @@ export const LastTransaction = styled.Text<TypeProps>`
 
   color: ${(props) =>
     props.type === "total"
-      ? props.theme.colors.shape
+      ? props.theme.name === "dark"
+        ? props.theme.colors.text_dark
+        : props.theme.colors.shape
       : props.theme.colors.text};
 `;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -10,10 +10,11 @@ import {
   TransactionCardProps,
 } from "../../components/TransactionCard";
 import { HighlightCard } from "../../components/HighlightCard";
-import { ActivityIndicator } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { useTheme } from "styled-components";
 import { useAuth } from "../../hooks/auth";
 import { Alert } from "react-native";
+import { ThemeContext } from "../../context/ThemeContext";
 
 type Transaction = {
   amount: number;
@@ -36,6 +37,7 @@ type HighlightData = {
 };
 
 const Dashboard: React.FC = () => {
+  const { setTheme } = useContext(ThemeContext);
   const theme = useTheme();
   const { logOutUser, user } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -243,9 +245,26 @@ const Dashboard: React.FC = () => {
                   <S.UserName>{user.name}</S.UserName>
                 </S.User>
               </S.UserInfo>
-              <S.LogoutButton onPress={logOutUser}>
-                <S.Icon name="power" />
-              </S.LogoutButton>
+              <View
+                style={{
+                  flexDirection: "row",
+                }}
+              >
+                <S.LogoutButton
+                  onPress={() =>
+                    setTheme((s) => (s === "light" ? "dark" : "light"))
+                  }
+                  style={{
+                    marginRight: 10,
+                  }}
+                >
+                  <S.Icon name="moon" />
+                </S.LogoutButton>
+
+                <S.LogoutButton onPress={logOutUser}>
+                  <S.Icon name="power" />
+                </S.LogoutButton>
+              </View>
             </S.UserWrapper>
           </S.Header>
           <S.HighlightCards>

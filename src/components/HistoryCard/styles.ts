@@ -25,9 +25,17 @@ export const Container = styled.View<Color>`
 export const Title = styled.Text`
   font-family: ${({ theme }) => theme.fonts.regular};
   font-size: ${RFValue(15)}px;
+  color: ${(props) =>
+    props.theme.name === "light"
+      ? props.theme.colors.text_dark
+      : props.theme.colors.text};
 `;
 
 export const Amount = styled.Text`
   font-family: ${({ theme }) => theme.fonts.bold};
   font-size: ${RFValue(15)}px;
+  color: ${(props) =>
+    props.theme.name === "light"
+      ? props.theme.colors.text_dark
+      : props.theme.colors.text};
 `;

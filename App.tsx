@@ -1,5 +1,4 @@
 import React from "react";
-import { ThemeProvider } from "styled-components/native";
 import { StatusBar } from "expo-status-bar";
 import {
   useFonts,
@@ -9,11 +8,10 @@ import {
 } from "@expo-google-fonts/poppins";
 import AppLoading from "expo-app-loading";
 
-import theme from "./src/global/styles/theme";
-
 import { NavigationContainer } from "@react-navigation/native";
 import { AppRoutes } from "./src/routes/app.routes";
 import { AuthProvider } from "./src/hooks/auth";
+import { ThemeProvider } from "./src/context/ThemeContext";
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -27,7 +25,7 @@ export default function App() {
   }
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider>
       <StatusBar style="light" translucent />
       <NavigationContainer>
         <AuthProvider>

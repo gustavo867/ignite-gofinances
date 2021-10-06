@@ -28,11 +28,19 @@ export const Category = styled(RectButton)<IsActive>`
 
 export const Icon = styled(Feather)`
   font-size: ${RFValue(20)}px;
+  color: ${(props) =>
+    props.theme.name === "light"
+      ? props.theme.colors.text_dark
+      : props.theme.colors.text};
   margin-right: 16px;
 `;
 
 export const Name = styled.Text`
   font-family: ${({ theme }) => theme.fonts.regular};
+  color: ${(props) =>
+    props.theme.name === "light"
+      ? props.theme.colors.text_dark
+      : props.theme.colors.text};
   font-size: ${RFValue(14)}px;
 `;
 

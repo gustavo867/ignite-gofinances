@@ -1,4 +1,6 @@
 export default {
+  name: "light",
+
   colors: {
     primary: "#5636D3",
 
